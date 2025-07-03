@@ -33,14 +33,19 @@ def index():
 def get_restaurants():
 
         restaurants=Restaurant.query.all()  
-        return make_response(jsonify([restaurant.to_dict() for restaurant in restaurants]), 200)
+        return make_response(jsonify(
+            [{
+                "id": r.id,
+                "name": r.name,
+                "address":r.address}
+                for r in restaurants]), 200)
 
 
 # GET RESTAURANTS BY ID AND DELETE 
 @app.route('/restaurants/<int:id>', methods=['GET','DELETE'])
 def get_restaurant_by_id(id):
 
-    restaurant=Restaurant.query.get(id)
+    restaurant= db.session.get(Restaurant, id)
     
     if not restaurant:
         return make_response(jsonify({"error":"Restaurant not found"}), 404)
@@ -58,7 +63,13 @@ def get_restaurant_by_id(id):
 def get_pizza():
     
     pizzas=Pizza.query.all()
-    return make_response(jsonify([pizza.to_dict() for pizza in pizzas]), 200)
+    return make_response(jsonify([
+        {
+            "id": p.id,
+            "name":p.name,
+            "ingredients": p.ingredients
+        }
+        for p in pizzas]), 200)
 
 # ADD RESTAURANTPIZZA
 @app.route('/restaurant_pizzas', methods=['POST'])
@@ -85,8 +96,8 @@ def add_restaurant_pizza():
 
         return make_response(jsonify(response), 201)
 
-    except Exception as e:
-        return make_response(jsonify({"errors": [str(e)]}), 400)
+    except Exception:
+        return make_response(jsonify({"errors":["validation errors"]}), 400)
 
 
 if __name__ == "__main__":
